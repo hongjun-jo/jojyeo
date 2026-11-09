@@ -499,7 +499,7 @@ function renderToday(){
   if(ses){
     if(!ses.startAt) html += `<button class="ghost timerbtn" id="startWk">▶ START WORKOUT</button>`;
     else if(!ses.endAt) html += `<div class="timerrow"><div class="elapsed"><span class="eyebrow">WORKOUT</span><b id="elapsed">${fmtDur(Date.now()-ses.startAt)}</b></div><button class="primary finbtn" id="finishWk">■ FINISH WORKOUT</button></div>`;
-    else html += `<div class="timerrow done"><div class="elapsed"><span class="eyebrow">DONE · ${fmtDur(ses.endAt-ses.startAt)}</span><b>${ses.rating?`${ses.rating}/10`:"평점 없음"}</b>${ses.comment?`<div class="cmt">${esc(ses.comment)}</div>`:""}</div><div class="col"><button class="ghost sm" id="rateWk">평점·코멘트</button><button class="ghost sm" id="resumeWk">RESUME</button></div></div>`;
+    else html += `<div class="timerrow done"><div class="elapsed"><span class="eyebrow">DONE · ${fmtDur(ses.endAt-ses.startAt)}</span><b>${ses.rating?`${ses.rating}/10`:"평점 없음"}</b>${ses.comment?`<div class="cmt">${esc(ses.comment)}</div>`:""}</div><div class="col"><button class="ghost sm" id="rateWk">RATING · FEEDBACK</button><button class="ghost sm" id="resumeWk">RESUME</button></div></div>`;
   }
   html += `</section>`;
 
@@ -569,8 +569,8 @@ function renderToday(){
 // 운동 완료 평점·코멘트
 function openRating(ses){
   const html=`<section class="sheet"><h2>${esc(ses.dayName||"오늘 운동")} · ${ses.startAt&&ses.endAt?fmtDur(ses.endAt-ses.startAt):""}</h2>
-    <div class="eyebrow">오늘 운동 평점</div><div class="rating" id="rating">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button data-r="${n}" aria-pressed="${ses.rating===n}">${n}</button>`).join("")}</div>
-    <div class="eyebrow">코멘트</div><textarea id="cmt" class="cmtin" rows="4" placeholder="컨디션, 잘 된 거, 아쉬운 거…">${esc(ses.comment||"")}</textarea>
+    <div class="eyebrow">RATING</div><div class="rating" id="rating">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button data-r="${n}" aria-pressed="${ses.rating===n}">${n}</button>`).join("")}</div>
+    <div class="eyebrow">FEEDBACK</div><textarea id="cmt" class="cmtin" rows="4" placeholder="컨디션, 잘 된 거, 아쉬운 거…">${esc(ses.comment||"")}</textarea>
     <button class="primary" id="saveRate">저장</button><button class="ghost" id="cancelRate">닫기</button></section>`;
   $main.replaceChildren(h(html)); window.scrollTo(0,0);
   let r=ses.rating||null;
@@ -586,7 +586,7 @@ function renderSession(){
   const ids=orderedIds(ses);
   let html=`<section class="sheet daybox"><div class="eyebrow">${fmtDate(ses.date)} · ${esc(ses.parts?.join(" · ")||"")}</div>
     <div class="sessmeta"><div><span class="eyebrow">WORKOUT</span><b>${ses.startAt&&ses.endAt?fmtDur(ses.endAt-ses.startAt):"—"}</b></div><div><span class="eyebrow">RATING</span><b>${ses.rating?`${ses.rating}/10`:"—"}</b></div><div><span class="eyebrow">SETS</span><b>${Object.values(ses.entries).reduce((a,b)=>a+b.length,0)}</b></div></div>
-    ${ses.comment?`<div class="cmt">${esc(ses.comment)}</div>`:""}<button class="ghost sm" id="editRate">평점·코멘트 수정</button></section>`;
+    ${ses.comment?`<div class="cmt">${esc(ses.comment)}</div>`:""}<button class="ghost sm" id="editRate">RATING · FEEDBACK 수정</button></section>`;
   html+=`<section><div class="eyebrow">운동 순서</div><div class="strip">`;
   ids.forEach((id,i)=>{ const m=machineById(id), sets=ses.entries[id]; const g=groupOf(ses,id);
     html += `<div class="excard ${g?"grouped g"+((ses.groups.indexOf(g))%4):""}">${g?`<div class="gband">${esc(groupLabel(ses,g))}</div>`:""}<div class="num">${i+1}</div>${imgHtml(m||{name:id,equip:"machine"})}<div class="exname">${esc(m?.name||id)}</div>
