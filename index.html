@@ -230,6 +230,9 @@ h2{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance;letter-s
 .sessmeta div{display:flex;flex-direction:column;background:var(--surface2);border-radius:10px;padding:8px 10px}
 .sessmeta b{font-family:var(--display);font-size:22px}
 .sheet .cmt{font-size:14px;white-space:pre-wrap;color:var(--fg)}
+.unitrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.unitseg{flex:0 0 auto;min-width:190px}
+.unitseg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 .unitbtn{margin-left:auto;flex-shrink:0;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:4px 10px;font-family:var(--display);font-size:14px;font-weight:700}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .gtag{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.04em}
@@ -554,7 +557,8 @@ let selectMode=false, selected=new Set(), timerIv=null;
 function renderToday(){
   const ses = todaySession();
   clearInterval(timerIv);
-  $top.replaceChildren(h(`<div class="brand">${LOGO_MARK}<span class="word">조져</span><small>Lift log</small></div><div class="right">${fmtDate(TODAY)}</div>`));
+  $top.replaceChildren(h(`<div class="brand">${LOGO_MARK}<span class="word">조져</span><small>Lift log</small></div><button class="unitbtn" id="homeUnit" title="무게 단위 바꾸기">${unit()} ⇄</button>`));
+  document.querySelector("#homeUnit").addEventListener("click",()=>{ state.prefs.unit=unit()==="lb"?"kg":"lb"; save(); render(); toast(`무게 단위: ${state.prefs.unit}`); });
   const recent=[...new Set(state.sessions.filter(s=>s.date!==TODAY).sort((a,b)=>a.date<b.date?1:-1).map(s=>s.dayName).filter(Boolean))].slice(0,6);
   let html = `<section class="sheet daybox"><div class="eyebrow">${fmtDate(TODAY)} · 오늘은 무슨 날?</div>
     <input type="text" id="dayName" class="dayinput" placeholder="예: 풀 데이, 가슴+삼두, 하체" value="${esc(ses?.dayName||"")}" maxlength="30">
@@ -792,7 +796,7 @@ function renderLog(){
     const ref = sets[sets.length-1] || last?.sets[last.sets.length-1];
     draft = {mid:m.id, reps: ref?.reps ?? 10, kg: ref?.kg ?? (equip==="body"?0:null),
       side: ref?.side && !["총","덤벨","케이블","맨몸"].includes(ref.side) ? ref.side : (m.unilateral?"한쪽":"양쪽"),
-      plates: ref?.plates ? [...ref.plates] : [],
+      plates: ref?.plates && ref.plates.every(x=>PL.some(p=>Math.abs(p-x)<0.01)) ? [...ref.plates] : [],
       bar: ref?.bar ?? m.bar ?? (isLb?20.4:20),
       mode: equip==="machine" || equip==="cable" ? (m.stack ? "kg" : (ref && !ref.plates?.length && ref.kg ? "kg" : "plate")) : equip };
   }
@@ -822,7 +826,7 @@ function renderLog(){
   }
   html += `</section>`;
 
-  html += `<section class="sheet">`;
+  html += `<section class="sheet"><div class="unitrow"><span class="eyebrow">무게 단위</span><div class="seg unitseg" id="unitSeg"><button data-u="kg" aria-pressed="${!isLb}">kg</button><button data-u="lb" aria-pressed="${isLb}">lb (파운드)</button></div></div>`;
   if(equip==="machine"){
     html += `<div class="seg" id="sideSeg"><button data-s="한쪽" aria-pressed="${draft.side==="한쪽"}">한쪽 기준</button><button data-s="양쪽" aria-pressed="${draft.side==="양쪽"}">양쪽 합계</button></div>
       <div class="seg" id="modeSeg"><button data-m="plate" aria-pressed="${draft.mode==="plate"}">플레이트로</button><button data-m="kg" aria-pressed="${draft.mode==="kg"}">${U} 직접</button></div>`;
@@ -854,6 +858,7 @@ function renderLog(){
   $main.replaceChildren(h(html));
 
   document.querySelector("#back").addEventListener("click",()=>go({name:"machines"}));
+  $main.querySelectorAll("#unitSeg button").forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.u===U) return; state.prefs.unit=b.dataset.u; save(); draft.mid=null; render(); toast(`단위: ${b.dataset.u}`); }));
   document.querySelector("#unitBtn").addEventListener("click",()=>{ state.prefs.unit = isLb?"kg":"lb"; save(); draft.mid=null; render(); toast(`단위: ${state.prefs.unit}`); });
   $main.querySelectorAll("[data-gm]").forEach(b=>b.addEventListener("click",()=>go({name:"log",mid:b.dataset.gm})));
   $main.querySelectorAll("[data-sess]").forEach(b=>b.addEventListener("click",()=>go({name:"session",date:b.dataset.sess})));
