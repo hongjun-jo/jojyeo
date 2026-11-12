@@ -127,6 +127,13 @@ h2{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance;letter-s
 .mcard .img img{width:100%;height:100%;object-fit:cover;display:block}
 .mcard .img.ico{background:var(--surface2)}
 .mcard .img svg{width:62%;height:62%;color:var(--muted)}
+.img.typo{background:linear-gradient(160deg,#6ec3ec 0%,#3d9fd6 100%)!important;color:#06283d;display:flex!important;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:10%;text-align:left;gap:2px}
+.img.typo small{font-family:var(--display);font-size:11px;letter-spacing:.18em;opacity:.75}
+.img.typo b{font-family:var(--display);font-size:26px;line-height:1;letter-spacing:.04em}
+.img.typo span{font-family:var(--body);font-weight:700;font-size:13px;line-height:1.25;margin-top:4px}
+.hero .img.typo{justify-content:flex-start}.hero .img.typo b{font-size:20px}.hero .img.typo span{font-size:11px}.hero .img.typo small{font-size:9px}
+.excard .img.typo b{font-size:22px}.excard .img.typo span{font-size:12px}
+.reallink{font-size:12px;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .img.broken::after{content:attr(data-ph);font-family:var(--display);font-size:34px;color:var(--muted);letter-spacing:.04em}
 .mcard .img .ph{font-family:var(--display);font-size:40px;color:var(--muted);letter-spacing:.04em}
 .mcard .meta{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
@@ -382,6 +389,15 @@ const CABLE = [
   ["하체","케이블 킥백 (둔근)",["둔근"]],["하체","케이블 풀스루",["둔근","햄스트링"]],["하체","케이블 힙 어브덕션",["둔근"]],["하체","케이블 힙 어덕션",["둔근"]],["하체","케이블 스쿼트",["대퇴사두","둔근"]],["하체","케이블 루마니안 데드리프트",["햄스트링","둔근"]],["하체","케이블 레그 컬 (스탠딩)",["햄스트링"]],
   ["코어","케이블 크런치 (무릎 꿇고)",["복근"]],["코어","케이블 우드촙 (하이→로우)",["복근"]],["코어","케이블 우드촙 (로우→하이)",["복근"]],["코어","팔로프 프레스",["복근"]],
 ].map(([g,n,p],i)=>({id:"cb-"+i, name:n, brand:"케이블", group:g, parts:p||[g], equip:"cable", stack:true}));
+// Nautilus Nitro (단종 라인, 공식 사진 없음 → 하늘색 글자 카드)
+const NITRO = [
+  ["가슴","Vertical Chest",["가슴"],"버티컬 체스트 프레스"],["가슴","Incline Press",["가슴","전면어깨"],"인클라인 프레스"],["가슴","Decline Press",["가슴"],"디클라인 프레스"],["가슴","Pec Fly",["가슴"],"펙 플라이 펙덱"],
+  ["어깨","Overhead Press",["전면어깨","측면어깨"],"오버헤드 숄더 프레스"],["어깨","Lateral Raise",["측면어깨"],"레터럴 레이즈"],["어깨","Rear Deltoid",["후면어깨"],"리어 델트"],["어깨","Plus Pec Fly / Rear Delt",["가슴","후면어깨"],"펙 플라이 리어 델트"],
+  ["등","Lat Pulldown",["등"],"랫풀다운 렛풀다운"],["등","Compound Row",["등"],"컴파운드 로우"],["등","Mid Row",["등"],"미드 로우"],["등","Pullover",["등","가슴"],"풀오버"],["등","Gravitron (Assist Chin / Dip)",["등","삼두"],"그래비트론 어시스트 풀업 친업 딥"],
+  ["이두","Biceps Curl",["이두"],"바이셉스 컬 이두"],["이두","Preacher Curl",["이두"],"프리처 컬"],["삼두","Triceps Extension",["삼두"],"트라이셉스 익스텐션 삼두"],["삼두","Seated Dip",["삼두","가슴"],"시티드 딥"],
+  ["하체","Leg Press",["대퇴사두","둔근"],"레그 프레스"],["하체","Leg Extension",["대퇴사두"],"레그 익스텐션"],["하체","Seated Leg Curl",["햄스트링"],"시티드 레그 컬"],["하체","Prone Leg Curl",["햄스트링"],"프론 라잉 레그 컬"],["하체","Hip Abduction",["둔근"],"힙 어브덕션 아우터"],["하체","Hip Adduction",["둔근"],"힙 어덕션 이너"],["하체","Plus Hip Abduction / Adduction",["둔근"],"힙 어브덕션 어덕션 이너 아우터"],["하체","Glute Press",["둔근"],"글루트 프레스"],["하체","Seated Calf",["종아리"],"시티드 카프"],
+  ["코어","Abdominal",["복근"],"복근 크런치"],["코어","Lower Back",["허리"],"로어백 백 익스텐션"],["코어","Rotary Torso",["복근"],"로터리 토르소"],
+].map(([g,n,p,k],i)=>({id:"nn-"+i, name:"Nautilus Nitro "+n, short:n, brand:"Nautilus", line:"Nitro", group:g, parts:p, equip:"machine", stack:true, typo:true, ko:k+" | 니트로 나이트로 나우틸러스 노틸러스 너틸러스"}));
 const SMITH = [
   ["가슴","스미스 벤치 프레스",["가슴","삼두"]],["가슴","스미스 인클라인 프레스",["가슴","전면어깨"]],["가슴","스미스 디클라인 프레스",["가슴"]],["삼두","스미스 클로즈그립 벤치 프레스",["삼두","가슴"]],
   ["어깨","스미스 숄더 프레스 (오버헤드)",["전면어깨","측면어깨"]],["어깨","스미스 비하인드 넥 프레스",["전면어깨","측면어깨"]],["어깨","스미스 업라이트 로우",["측면어깨","승모근"]],["등","스미스 슈러그",["승모근"]],
@@ -395,7 +411,7 @@ const BODY = [
   ["등","풀업",["등","이두"]],["이두","친업",["이두","등"]],["가슴","푸쉬업",["가슴","삼두"]],["삼두","딥스 (평행봉)",["삼두","가슴"]],["삼두","다이아몬드 푸쉬업",["삼두","가슴"]],
   ["전면어깨","파이크 푸쉬업",["전면어깨"]],["등","인버티드 로우",["등","후면어깨"]],["복근","행잉 레그 레이즈",["복근"]],["복근","플랭크",["복근"]],["복근","크런치 / 싯업",["복근"]],["허리","백 익스텐션 (맨몸)",["허리","둔근"]],["하체","맨몸 스쿼트 / 런지",["대퇴사두","둔근"]],
 ].map(([g,n,p],i)=>({id:"bw-"+i, name:n, brand:"맨몸", group:g, parts:p, equip:"body"}));
-const DEFAULT_MACHINES = [...HS, ...BRAND_MACHINES, ...DUMBBELL, ...BARBELL, ...SMITH, ...CABLE, ...BODY].map(m=>({equip:"machine", ...m, builtin:true}));
+const DEFAULT_MACHINES = [...HS, ...BRAND_MACHINES, ...DUMBBELL, ...BARBELL, ...NITRO, ...SMITH, ...CABLE, ...BODY].map(m=>({equip:"machine", ...m, builtin:true}));
 const DEFAULT_IDS = new Set(DEFAULT_MACHINES.map(m=>m.id));
 
 // ---------- 상태 ----------
@@ -408,7 +424,7 @@ function load(){
 }
 function migrate(s){
   for(const ses of s.sessions){ for(const [o,n] of Object.entries(OLD_IDS)){ if(ses.entries[o] && o!==n){ ses.entries[n]=(ses.entries[n]||[]).concat(ses.entries[o]); delete ses.entries[o]; } } }
-  const mine=(s.machines||[]).filter(m=>!m.builtin && !(m.id in OLD_IDS) && !DEFAULT_IDS.has(m.id) && !/^(hs|nt|cy|tg|lf|na|db|bb|cb|bw|sm)-/.test(m.id));
+  const mine=(s.machines||[]).filter(m=>!m.builtin && !(m.id in OLD_IDS) && !DEFAULT_IDS.has(m.id) && !/^(hs|nt|cy|tg|lf|na|nn|db|bb|cb|bw|sm)-/.test(m.id));
   s.machines=DEFAULT_MACHINES.map(m=>({...m})).concat(mine);
   for(const m of mine){ if(m.group==='팔') m.group='이두'; m.parts ||= [m.group]; }
   const legacy={push:["가슴","전면어깨","삼두"],pull:["등","이두","후면어깨"],legs:["대퇴사두","햄스트링","둔근","종아리"],chest:["가슴"],back:["등"],shoulder:["전면어깨","측면어깨","후면어깨"],arms:["이두","삼두"]};
@@ -477,6 +493,7 @@ const ICON_BB = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stro
 function imgHtml(m){
   const src=imgOf(m);
   if(src) return `<div class="img" data-ph="${esc(initials(m))}"><img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="var p=this.parentElement;p.classList.add('ico','broken');this.remove()"></div>`;
+  if(m.typo) return `<div class="img typo"><small>NAUTILUS</small><b>NITRO</b><span>${esc(m.short)}</span></div>`;
   if(m.equip==="dumbbell") return `<div class="img ico">${ICON_DB}</div>`;
   if(m.equip==="barbell") return `<div class="img ico">${ICON_BB}</div>`;
   if(m.equip==="cable") return `<div class="img ico">${ICON_CB}</div>`;
@@ -755,7 +772,7 @@ function renderLog(){
   if(g){ html += `<div class="gtabs"><span class="gtag">${esc(groupLabel(ses,g))}</span>${g.ids.map(id=>{const mm=machineById(id); return `<button class="chip ${id===m.id?"on":""}" data-gm="${id}" aria-pressed="${id===m.id}">${esc((mm?.name||id).replace(/^(Hammer Strength|Life Fitness|Nautilus|Newtech|Cybex|Technogym) /,""))}</button>`;}).join("")}</div>`; }
   html += `<div class="hero"><label class="heroimg" for="photoIn" title="사진 바꾸기">${imgHtml(m)}<span class="camtag">${hasPhoto?"내 사진":"📷 사진 바꾸기"}</span><input type="file" id="photoIn" accept="image/*" capture="environment" hidden></label>
     <div class="info"><h2>${esc(m.name)}</h2><div><span class="pill">${esc(brandLabel(m))}</span> <span class="pill">${esc(m.parts.join(" · "))}</span> ${m.unilateral?'<span class="pill">양팔 독립</span>':''}${m.stack&&equip==="machine"?'<span class="pill">웨이트 스택</span>':''}</div>
-    ${hasPhoto?`<button class="muted" id="photoDel" style="font-size:12px;text-decoration:underline;text-align:left">원래 사진으로</button>`:""}</div></div>`;
+    ${hasPhoto?`<button class="muted" id="photoDel" style="font-size:12px;text-decoration:underline;text-align:left">원래 사진으로</button>`:""}${m.typo&&!hasPhoto?`<a class="reallink" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">실물 사진 보기 ↗</a>`:""}</div></div>`;
 
   // 지난 기록 2개
   html += `<section class="lastlist"><div class="eyebrow">지난 기록</div>`;
