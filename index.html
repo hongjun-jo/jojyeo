@@ -127,12 +127,13 @@ h2{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance;letter-s
 .mcard .img img{width:100%;height:100%;object-fit:cover;display:block}
 .mcard .img.ico{background:var(--surface2)}
 .mcard .img svg{width:62%;height:62%;color:var(--muted)}
-.img.typo{background:linear-gradient(160deg,#6ec3ec 0%,#3d9fd6 100%)!important;color:#06283d;display:flex!important;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:10%;text-align:left;gap:2px}
-.img.typo small{font-family:var(--display);font-size:11px;letter-spacing:.18em;opacity:.75}
-.img.typo b{font-family:var(--display);font-size:26px;line-height:1;letter-spacing:.04em}
-.img.typo span{font-family:var(--body);font-weight:700;font-size:13px;line-height:1.25;margin-top:4px}
-.hero .img.typo{justify-content:flex-start}.hero .img.typo b{font-size:20px}.hero .img.typo span{font-size:11px}.hero .img.typo small{font-size:9px}
-.excard .img.typo b{font-size:22px}.excard .img.typo span{font-size:12px}
+.img.typo{background:linear-gradient(160deg,#3f9fe0 0%,#1f6fc2 100%)!important;position:relative;display:grid!important;place-items:center}
+.img.typo svg{width:76%!important;height:76%!important;margin-top:12%;fill:none;stroke:#fff;color:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.img.typo svg .thin{stroke-width:1.6;opacity:.75}.img.typo svg .pad{stroke-width:7}.img.typo svg .mv{stroke-width:4}
+.img.typo .tlabel{position:absolute;top:7%;left:8%;right:6%;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 5px;color:#fff;line-height:1}
+.img.typo .tlabel small{font-family:var(--display);font-size:10px;letter-spacing:.16em;opacity:.9}
+.img.typo .tlabel b{font-family:var(--display);font-size:14px;letter-spacing:.06em}
+.hero .img.typo .tlabel small{font-size:8px}.hero .img.typo .tlabel b{font-size:11px}
 .reallink{font-size:12px;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .img.broken::after{content:attr(data-ph);font-family:var(--display);font-size:34px;color:var(--muted);letter-spacing:.04em}
 .mcard .img .ph{font-family:var(--display);font-size:40px;color:var(--muted);letter-spacing:.04em}
@@ -389,6 +390,42 @@ const CABLE = [
   ["하체","케이블 킥백 (둔근)",["둔근"]],["하체","케이블 풀스루",["둔근","햄스트링"]],["하체","케이블 힙 어브덕션",["둔근"]],["하체","케이블 힙 어덕션",["둔근"]],["하체","케이블 스쿼트",["대퇴사두","둔근"]],["하체","케이블 루마니안 데드리프트",["햄스트링","둔근"]],["하체","케이블 레그 컬 (스탠딩)",["햄스트링"]],
   ["코어","케이블 크런치 (무릎 꿇고)",["복근"]],["코어","케이블 우드촙 (하이→로우)",["복근"]],["코어","케이블 우드촙 (로우→하이)",["복근"]],["코어","팔로프 프레스",["복근"]],
 ].map(([g,n,p],i)=>({id:"cb-"+i, name:n, brand:"케이블", group:g, parts:p||[g], equip:"cable", stack:true}));
+// 머신 유형별 일러스트 (직접 그린 일반 도식)
+const IL = (()=>{
+  const B='<path d="M14 104h96"/>';
+  const SR='<rect x="88" y="22" width="18" height="82" rx="2"/><path class="thin" d="M88 34h18M88 44h18M88 54h18M88 64h18M88 74h18M88 84h18M88 94h18"/>';
+  const SL='<rect x="14" y="30" width="18" height="74" rx="2"/><path class="thin" d="M14 42h18M14 52h18M14 62h18M14 72h18M14 82h18M14 92h18"/>';
+  const SEAT='<path d="M48 104V78"/><path class="pad" d="M38 76h24"/><path class="pad" d="M38 70L33 36"/>';
+  const RECL='<path d="M48 104V78"/><path class="pad" d="M38 76h24"/><path class="pad" d="M36 70L22 42"/>';
+  const STOOL='<path d="M36 104V80"/><path class="pad" d="M26 78h22"/>';
+  const FRONT='<path class="pad" d="M48 84h24"/><path d="M60 104V86"/><path class="pad" d="M60 78V40"/>';
+  return {
+    press: B+SR+'<path d="M62 22h26"/>'+SEAT+'<path class="mv" d="M62 22L68 54"/><path class="mv pad" d="M68 54h10"/>',
+    incline: B+SR+RECL+'<path class="mv" d="M88 60L64 36"/><path class="mv pad" d="M64 36l-9-7"/>',
+    decline: B+SR+'<path d="M62 22h26"/>'+SEAT+'<path class="mv" d="M62 22L72 66"/><path class="mv pad" d="M72 66h10"/>',
+    overhead: B+SR+SEAT+'<path class="mv" d="M88 38L56 20"/><path class="mv pad" d="M56 20H44"/>',
+    fly: B+'<rect x="51" y="16" width="18" height="20" rx="2"/>'+FRONT+'<path class="mv" d="M60 30L28 38v28M60 30L92 38v28"/><path class="mv pad" d="M28 46v18M92 46v18"/>',
+    lateral: B+FRONT+'<path class="mv" d="M60 52L26 36M60 52L94 36"/><path class="mv pad" d="M32 38l-11-5M88 38l11-5"/>',
+    pulldown: B+SR+'<path d="M97 22V12H44"/><path class="thin" d="M44 12v22"/><path class="mv" d="M22 40l8-6h28l8 6"/><path d="M46 104V84"/><path class="pad" d="M34 82h24"/><path d="M88 70H66"/><path class="pad" d="M62 70h6"/>',
+    row: B+SR+'<path d="M40 104V78"/><path class="pad" d="M28 76h24"/><path d="M64 104V52"/><path class="pad" d="M64 44v18"/><path class="mv" d="M88 34L76 54"/><path class="mv pad" d="M76 54h-9"/>',
+    pullover: B+SR+RECL+'<path d="M58 32h30"/><circle class="mv" cx="46" cy="32" r="12"/><path class="mv pad" d="M55 23l13-9"/>',
+    gravitron: B+'<path d="M30 104V14h50v90"/><path class="mv pad" d="M36 28h11M63 28h11"/><path class="mv pad" d="M42 80h26"/><path class="mv" d="M55 80v24"/><rect x="90" y="40" width="16" height="64" rx="2"/><path class="thin" d="M90 52h16M90 64h16M90 76h16M90 88h16"/>',
+    curl: B+SR+STOOL+'<path d="M62 104V62"/><path class="pad" d="M50 68l22-13"/><path class="mv" d="M72 54l7-22"/><path class="mv pad" d="M75 30h11"/>',
+    triceps: B+SR+STOOL+'<path d="M62 104V62"/><path class="pad" d="M50 68l22-13"/><path class="mv" d="M72 55l14 9"/><path class="mv pad" d="M84 60l6 9"/>',
+    dip: B+SR+SEAT+'<path d="M26 34h62" class="thin"/><path class="mv" d="M26 34L58 62"/><path class="mv pad" d="M54 62h12"/>',
+    legpress: '<path d="M10 104h100"/><path d="M30 36L84 92M22 46L74 100"/><path class="mv pad" d="M22 26L40 52"/><circle class="mv" cx="18" cy="52" r="10"/><path class="pad" d="M74 98l14-4"/><path class="pad" d="M90 92L108 64"/><path d="M96 104V92"/>',
+    legext: B+SL+'<path d="M60 104V64"/><path class="pad" d="M46 62h30"/><path class="pad" d="M46 56L41 26"/><path class="mv" d="M78 62L88 92"/><circle class="mv" cx="92" cy="94" r="6"/><path class="thin" d="M32 60h14"/>',
+    legcurl: B+SL+'<path d="M60 104V64"/><path class="pad" d="M46 62h30"/><path class="pad" d="M46 56L41 26"/><path class="pad" d="M64 48h14"/><path class="mv" d="M78 62L100 74"/><circle class="mv" cx="104" cy="77" r="6"/><path class="thin" d="M32 60h14"/>',
+    prone: B+SL+'<path class="pad" d="M40 72l44-9"/><path d="M52 104V72M76 104V66"/><path class="mv" d="M84 63l10-22"/><circle class="mv" cx="96" cy="36" r="6"/>',
+    hip: B+'<path class="pad" d="M48 70h24"/><path d="M60 104V72"/><path class="pad" d="M60 64V34"/><path class="mv" d="M56 74L30 96M64 74L90 96"/><path class="mv pad" d="M37 84l-9 9M83 84l9 9"/>',
+    glute: B+SR+'<path d="M42 104V60"/><path class="pad" d="M30 58h26"/><path class="pad" d="M34 84h18"/><path class="mv" d="M88 50L68 70"/><path class="mv pad" d="M68 62v16"/>',
+    calf: B+STOOL+'<path class="pad" d="M56 100h16"/><path class="mv pad" d="M50 62h20"/><path class="mv" d="M62 62L88 76"/><circle class="mv" cx="92" cy="80" r="12"/>',
+    ab: B+SR+'<path d="M62 22h26"/>'+SEAT+'<path class="mv" d="M62 22L58 48"/><path class="mv pad" d="M51 50h15"/>',
+    lowerback: B+SR+'<path d="M56 104V78"/><path class="pad" d="M46 76h24"/><path class="pad" d="M80 98l6-14"/><path class="mv" d="M42 76L31 42"/><circle class="mv" cx="29" cy="36" r="6"/>',
+    torso: B+FRONT+'<path class="mv" d="M32 54a28 28 0 0 1 56 0"/><path class="mv" d="M88 54l-9-3M88 54l3-10"/><path class="mv pad" d="M44 52h32"/>',
+  };
+})();
+const NITRO_IL = ["press","incline","decline","fly","overhead","lateral","fly","fly","pulldown","row","row","pullover","gravitron","curl","curl","triceps","dip","legpress","legext","legcurl","prone","hip","hip","hip","glute","calf","ab","lowerback","torso"];
 // Nautilus Nitro (단종 라인, 공식 사진 없음 → 하늘색 글자 카드)
 const NITRO = [
   ["가슴","Vertical Chest",["가슴"],"버티컬 체스트 프레스"],["가슴","Incline Press",["가슴","전면어깨"],"인클라인 프레스"],["가슴","Decline Press",["가슴"],"디클라인 프레스"],["가슴","Pec Fly",["가슴"],"펙 플라이 펙덱"],
@@ -397,7 +434,7 @@ const NITRO = [
   ["이두","Biceps Curl",["이두"],"바이셉스 컬 이두"],["이두","Preacher Curl",["이두"],"프리처 컬"],["삼두","Triceps Extension",["삼두"],"트라이셉스 익스텐션 삼두"],["삼두","Seated Dip",["삼두","가슴"],"시티드 딥"],
   ["하체","Leg Press",["대퇴사두","둔근"],"레그 프레스"],["하체","Leg Extension",["대퇴사두"],"레그 익스텐션"],["하체","Seated Leg Curl",["햄스트링"],"시티드 레그 컬"],["하체","Prone Leg Curl",["햄스트링"],"프론 라잉 레그 컬"],["하체","Hip Abduction",["둔근"],"힙 어브덕션 아우터"],["하체","Hip Adduction",["둔근"],"힙 어덕션 이너"],["하체","Plus Hip Abduction / Adduction",["둔근"],"힙 어브덕션 어덕션 이너 아우터"],["하체","Glute Press",["둔근"],"글루트 프레스"],["하체","Seated Calf",["종아리"],"시티드 카프"],
   ["코어","Abdominal",["복근"],"복근 크런치"],["코어","Lower Back",["허리"],"로어백 백 익스텐션"],["코어","Rotary Torso",["복근"],"로터리 토르소"],
-].map(([g,n,p,k],i)=>({id:"nn-"+i, name:"Nautilus Nitro "+n, short:n, brand:"Nautilus", line:"Nitro", group:g, parts:p, equip:"machine", stack:true, typo:true, ko:k+" | 니트로 나이트로 나우틸러스 노틸러스 너틸러스"}));
+].map(([g,n,p,k],i)=>({id:"nn-"+i, name:"Nautilus Nitro "+n, short:n, brand:"Nautilus", line:"Nitro", group:g, parts:p, equip:"machine", stack:true, typo:true, il:NITRO_IL[i], ko:k+" | 니트로 나이트로 나우틸러스 노틸러스 너틸러스"}));
 const SMITH = [
   ["가슴","스미스 벤치 프레스",["가슴","삼두"]],["가슴","스미스 인클라인 프레스",["가슴","전면어깨"]],["가슴","스미스 디클라인 프레스",["가슴"]],["삼두","스미스 클로즈그립 벤치 프레스",["삼두","가슴"]],
   ["어깨","스미스 숄더 프레스 (오버헤드)",["전면어깨","측면어깨"]],["어깨","스미스 비하인드 넥 프레스",["전면어깨","측면어깨"]],["어깨","스미스 업라이트 로우",["측면어깨","승모근"]],["등","스미스 슈러그",["승모근"]],
@@ -493,7 +530,7 @@ const ICON_BB = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stro
 function imgHtml(m){
   const src=imgOf(m);
   if(src) return `<div class="img" data-ph="${esc(initials(m))}"><img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="var p=this.parentElement;p.classList.add('ico','broken');this.remove()"></div>`;
-  if(m.typo) return `<div class="img typo"><small>NAUTILUS</small><b>NITRO</b><span>${esc(m.short)}</span></div>`;
+  if(m.typo) return `<div class="img typo"><div class="tlabel"><small>NAUTILUS</small><b>NITRO</b></div><svg viewBox="0 0 120 120" aria-hidden="true">${IL[m.il]||""}</svg></div>`;
   if(m.equip==="dumbbell") return `<div class="img ico">${ICON_DB}</div>`;
   if(m.equip==="barbell") return `<div class="img ico">${ICON_BB}</div>`;
   if(m.equip==="cable") return `<div class="img ico">${ICON_CB}</div>`;
