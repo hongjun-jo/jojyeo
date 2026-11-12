@@ -263,6 +263,7 @@ const BRANDS = [
   {id:"Technogym", label:"Technogym"},
   {id:"덤벨", label:"덤벨"},
   {id:"바벨", label:"바벨"},
+  {id:"스미스", label:"스미스머신 운동"},
   {id:"케이블", label:"케이블 운동"},
   {id:"맨몸", label:"맨몸"},
   {id:"__mine", label:"내가 추가"},
@@ -338,6 +339,7 @@ const SLANG = [
   ["크런치", /크런치|crunch/],
   ["우드촙", /우드촙/],
   ["스미스", /스미스|smith/],
+  ["스벤", /스미스벤치/],["스스", /스미스스쿼트/],["스숄프", /스미스숄더프레스/],["스인클", /스미스인클라인/],["스데드", /스미스데드|스미스루마니안/],["스런지", /스미스런지|스미스스플릿|스미스불가리안/],["스힙쓰", /스미스힙쓰러스트/],["랙풀", /랙풀/],["드래그컬", /드래그컬/],["jm", /jm프레스/],
   ["케이블", /케이블|cable|pulley|풀리/],
   ["풀업", /풀업|친업|chin|pullup/],
   ["친업", /친업|풀업|chin/],
@@ -348,7 +350,7 @@ const SLANG = [
   ["고블릿", /고블릿/],
   ["백익", /백익스텐션|backextension|로어백|lowerback|hyper/],
 ];
-const BRAND_ORDER = {"Hammer Strength":0,"Life Fitness":1,"Nautilus":2,"Newtech":3,"Cybex":4,"Technogym":5,"덤벨":6,"바벨":7,"케이블":8,"맨몸":9};
+const BRAND_ORDER = {"Hammer Strength":0,"Life Fitness":1,"Nautilus":2,"Newtech":3,"Cybex":4,"Technogym":5,"덤벨":6,"바벨":7,"스미스":8,"케이블":9,"맨몸":10};
 const BARS = [{kg:20,label:"올림픽 바 20"},{kg:15,label:"15kg 바"},{kg:10,label:"EZ바 10"},{kg:0,label:"봉 제외"}];
 const BARS_LB = [{kg:20.4,label:"올림픽 바 45lb"},{kg:15.9,label:"35lb 바"},{kg:11.3,label:"EZ바 25lb"},{kg:0,label:"봉 제외"}];
 const DB_QUICK_LB = [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,90,100];
@@ -380,11 +382,20 @@ const CABLE = [
   ["하체","케이블 킥백 (둔근)",["둔근"]],["하체","케이블 풀스루",["둔근","햄스트링"]],["하체","케이블 힙 어브덕션",["둔근"]],["하체","케이블 힙 어덕션",["둔근"]],["하체","케이블 스쿼트",["대퇴사두","둔근"]],["하체","케이블 루마니안 데드리프트",["햄스트링","둔근"]],["하체","케이블 레그 컬 (스탠딩)",["햄스트링"]],
   ["코어","케이블 크런치 (무릎 꿇고)",["복근"]],["코어","케이블 우드촙 (하이→로우)",["복근"]],["코어","케이블 우드촙 (로우→하이)",["복근"]],["코어","팔로프 프레스",["복근"]],
 ].map(([g,n,p],i)=>({id:"cb-"+i, name:n, brand:"케이블", group:g, parts:p||[g], equip:"cable", stack:true}));
+const SMITH = [
+  ["가슴","스미스 벤치 프레스",["가슴","삼두"]],["가슴","스미스 인클라인 프레스",["가슴","전면어깨"]],["가슴","스미스 디클라인 프레스",["가슴"]],["삼두","스미스 클로즈그립 벤치 프레스",["삼두","가슴"]],
+  ["어깨","스미스 숄더 프레스 (오버헤드)",["전면어깨","측면어깨"]],["어깨","스미스 비하인드 넥 프레스",["전면어깨","측면어깨"]],["어깨","스미스 업라이트 로우",["측면어깨","승모근"]],["등","스미스 슈러그",["승모근"]],
+  ["등","스미스 벤트오버 로우",["등"]],["등","스미스 인버티드 로우",["등","후면어깨"]],["등","스미스 데드리프트 / 랙풀",["등","햄스트링","둔근","허리"]],
+  ["하체","스미스 스쿼트",["대퇴사두","둔근"]],["하체","스미스 프런트 스쿼트",["대퇴사두"]],["하체","스미스 스플릿 스쿼트",["대퇴사두","둔근"]],["하체","스미스 불가리안 스플릿 스쿼트",["대퇴사두","둔근"]],["하체","스미스 런지 (리버스)",["대퇴사두","둔근"]],["하체","스미스 루마니안 데드리프트",["햄스트링","둔근"]],["하체","스미스 힙 쓰러스트",["둔근"]],["하체","스미스 굿모닝",["햄스트링","허리"]],["하체","스미스 카프 레이즈",["종아리"]],["하체","스미스 스모 스쿼트",["대퇴사두","둔근"]],
+  ["삼두","스미스 JM 프레스",["삼두"]],["이두","스미스 드래그 컬",["이두"]],
+].map(([g,n,p],i)=>({id:"sm-"+i, name:n, brand:"스미스", group:g, parts:p, equip:"barbell", smith:true, bar:0}));
+const SMITH_BARS = [{kg:0,label:"봉 제외"},{kg:7,label:"스미스 바 7"},{kg:10,label:"10"},{kg:15,label:"15"},{kg:20,label:"20"}];
+const SMITH_BARS_LB = [{kg:0,label:"봉 제외"},{kg:6.8,label:"스미스 바 15lb"},{kg:11.3,label:"25lb"},{kg:15.9,label:"35lb"},{kg:20.4,label:"45lb"}];
 const BODY = [
   ["등","풀업",["등","이두"]],["이두","친업",["이두","등"]],["가슴","푸쉬업",["가슴","삼두"]],["삼두","딥스 (평행봉)",["삼두","가슴"]],["삼두","다이아몬드 푸쉬업",["삼두","가슴"]],
   ["전면어깨","파이크 푸쉬업",["전면어깨"]],["등","인버티드 로우",["등","후면어깨"]],["복근","행잉 레그 레이즈",["복근"]],["복근","플랭크",["복근"]],["복근","크런치 / 싯업",["복근"]],["허리","백 익스텐션 (맨몸)",["허리","둔근"]],["하체","맨몸 스쿼트 / 런지",["대퇴사두","둔근"]],
 ].map(([g,n,p],i)=>({id:"bw-"+i, name:n, brand:"맨몸", group:g, parts:p, equip:"body"}));
-const DEFAULT_MACHINES = [...HS, ...BRAND_MACHINES, ...DUMBBELL, ...BARBELL, ...CABLE, ...BODY].map(m=>({equip:"machine", ...m, builtin:true}));
+const DEFAULT_MACHINES = [...HS, ...BRAND_MACHINES, ...DUMBBELL, ...BARBELL, ...SMITH, ...CABLE, ...BODY].map(m=>({equip:"machine", ...m, builtin:true}));
 const DEFAULT_IDS = new Set(DEFAULT_MACHINES.map(m=>m.id));
 
 // ---------- 상태 ----------
@@ -397,7 +408,7 @@ function load(){
 }
 function migrate(s){
   for(const ses of s.sessions){ for(const [o,n] of Object.entries(OLD_IDS)){ if(ses.entries[o] && o!==n){ ses.entries[n]=(ses.entries[n]||[]).concat(ses.entries[o]); delete ses.entries[o]; } } }
-  const mine=(s.machines||[]).filter(m=>!m.builtin && !(m.id in OLD_IDS) && !DEFAULT_IDS.has(m.id) && !/^(hs|nt|cy|tg|lf|na|db|bb|cb|bw)-/.test(m.id));
+  const mine=(s.machines||[]).filter(m=>!m.builtin && !(m.id in OLD_IDS) && !DEFAULT_IDS.has(m.id) && !/^(hs|nt|cy|tg|lf|na|db|bb|cb|bw|sm)-/.test(m.id));
   s.machines=DEFAULT_MACHINES.map(m=>({...m})).concat(mine);
   for(const m of mine){ if(m.group==='팔') m.group='이두'; m.parts ||= [m.group]; }
   const legacy={push:["가슴","전면어깨","삼두"],pull:["등","이두","후면어깨"],legs:["대퇴사두","햄스트링","둔근","종아리"],chest:["가슴"],back:["등"],shoulder:["전면어깨","측면어깨","후면어깨"],arms:["이두","삼두"]};
@@ -452,7 +463,7 @@ function bestKg(sets){ return Math.max(...sets.map(s=>s.kg)); }
 function sideLabel(s){ return s.side==="총" ? "총 무게" : s.side==="덤벨" ? "한쪽" : s.side==="케이블" ? "스택" : s.side==="맨몸" ? "맨몸" : s.side; }
 function plateText(plates){ const map={}; for(const p of plates){ const k=toUnit(p); map[k]=(map[k]||0)+1; } return Object.keys(map).sort((a,b)=>b-a).map(p=>`${p}×${map[p]}장`).join(" + "); }
 function setDetail(s){
-  if(s.side==="총") return `봉 ${toUnit(s.bar)}${s.plates?.length?` + 한쪽 ${plateText(s.plates)}`:""}`;
+  if(s.side==="총") return `${s.bar?`봉 ${toUnit(s.bar)}`:"봉 제외"}${s.plates?.length?` + 한쪽 ${plateText(s.plates)}`:""}`;
   if(s.side==="맨몸") return s.kg>0?"추가 중량":s.kg<0?"보조":"맨몸";
   if(s.side==="덤벨") return "한쪽";
   if(s.side==="케이블") return "스택";
@@ -719,7 +730,7 @@ function renderLog(){
   const equip = m.equip || "machine";
   const U=unit(), isLb=U==="lb";
   const PL = isLb ? PLATES_LB.map(p=>Math.round(p*LB*1000)/1000) : PLATES;   // 저장은 kg
-  const BR = isLb ? BARS_LB : BARS;
+  const BR = m.smith ? (isLb ? SMITH_BARS_LB : SMITH_BARS) : (isLb ? BARS_LB : BARS);
   // 지난 기록 (이 종목을 한 최근 세션들)
   const hist = state.sessions.filter(s=>s.entries[m.id]?.length && s.date!==TODAY).sort((a,b)=>a.date<b.date?1:-1);
   const last = hist[0] ? {date:hist[0].date, sets:hist[0].entries[m.id]} : null;
