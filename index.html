@@ -304,8 +304,8 @@ const IMG = {"hs:iso-lateral-t-bar-row": "https://production-gvckb4eyhna3g6c7.a0
 
 // ---------- 기본 데이터 ----------
 const GROUPS = ["가슴","등","어깨","이두","삼두","하체","코어"]; // 종목 추가 폼용 큰 분류
-const PARTS = ["가슴","등","승모근","전면어깨","측면어깨","후면어깨","이두","삼두","전완","대퇴사두","햄스트링","둔근","종아리","복근","허리","케이블"];
-const PART_GROUPS = [["상체",["가슴","등","승모근"]],["어깨",["전면어깨","측면어깨","후면어깨"]],["팔",["이두","삼두","전완"]],["하체",["대퇴사두","햄스트링","둔근","종아리"]],["코어",["복근","허리"]],["기타",["케이블"]]];
+const PARTS = ["가슴","등","승모근","전면어깨","측면어깨","후면어깨","이두","삼두","전완","대퇴사두","햄스트링","둔근","종아리","복근","허리"];
+const PART_GROUPS = [["상체",["가슴","등","승모근"]],["어깨",["전면어깨","측면어깨","후면어깨"]],["팔",["이두","삼두","전완"]],["하체",["대퇴사두","햄스트링","둔근","종아리"]],["코어",["복근","허리"]]]; 
 const ALWAYS_GROUPS = ["케이블"];
 const BRANDS = [
   {id:"Hammer Strength", label:"Hammer"},
@@ -535,7 +535,7 @@ function seed(){
 function ymd(t){ return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
 const TODAY = ymd(new Date());
 function fmtDate(s){ const [y,m,d]=s.split("-"); const t=new Date(+y,+m-1,+d); const w="일월화수목금토"[t.getDay()]; return `${+m}/${+d} (${w})`; }
-function todaySession(){ return state.sessions.find(s=>s.date===TODAY); }
+function todaySession(){ const s=state.sessions.find(s=>s.date===TODAY); if(s&&s.parts) s.parts=s.parts.filter(p=>PARTS.includes(p)); return s; }
 function groupOf(ses,id){ return (ses.groups||[]).find(g=>g.ids.includes(id)); }
 function groupLabel(ses,g){ const i=(ses.groups||[]).indexOf(g); return (g.ids.length>=3?"자이언트세트":"슈퍼세트")+" "+String.fromCharCode(65+i); }
 function fmtDur(ms){ const m=Math.floor(ms/60000), h=Math.floor(m/60); return h?`${h}시간 ${m%60}분`:`${m}분`; }
