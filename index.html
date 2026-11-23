@@ -236,7 +236,7 @@ body::before{background:var(--red)}
 .unitbtn span.on{color:var(--red)}
 :focus-visible{outline-color:var(--cream)!important}
 main{padding-top:0}
-main>:first-child:not(.home):not(.hero){margin-top:16px}
+main>:first-child:not(.home):not(.hero):not(.calhead){margin-top:16px}
 h2{color:var(--hot)}
 .home,.hero{margin-inline:calc(-1*var(--pad));padding:0 var(--pad) 18px;background:var(--red)}
 .bigdate{color:var(--cream)}
@@ -288,6 +288,35 @@ h2{color:var(--hot)}
 .set.drop .v{font-size:clamp(26px,8.5vw,36px)}
 .set.drop .del{font-size:20px}
 .set:has(+.set.drop){border-bottom-style:dashed}
+.slab.run{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:clamp(22px,7.4vw,30px)}
+.slab.run b{font-weight:900;font-size:clamp(32px,10.5vw,44px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:0}
+.types{margin-top:-8px}
+.types .chip{padding:4px 11px;font-size:13.5px}
+.varbox{display:flex;flex-direction:column;gap:6px}
+.varbox .seg button{font-size:15px;padding:10px 4px}
+.varbox .seg button[aria-pressed="true"]{background:var(--red);color:var(--cream)}
+.varbox .seg{border-color:var(--cream)}
+.lblrow{display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:26px}
+.unitmini{display:inline-flex;border:2px solid var(--cream);flex-shrink:0}
+.unitmini button{font-family:var(--display);font-weight:900;font-size:15px;line-height:1.35;padding:0 9px;color:var(--cream)}
+.unitmini button[aria-pressed="true"]{background:var(--cream);color:var(--dark)}
+.calc .unitmini{align-self:center;margin-right:auto}
+.calhead{margin-inline:calc(-1*var(--pad));padding:4px var(--pad) 16px;background:var(--red);display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.calhead h2{font-family:var(--display);font-weight:900;font-size:68px;line-height:.9;color:var(--cream)}
+.calhead h2 small{display:block;font-family:var(--body);font-weight:800;font-size:14px;margin-bottom:6px}
+.calnav{display:flex;gap:8px}
+.calnav button{border:2.5px solid var(--cream);font-weight:800;font-size:13px;padding:6px 10px}
+main>.calhead:first-child{margin-top:0}
+.cal{margin-inline:-4px}
+.cwk,.cgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cwk span{font-size:11.5px;font-weight:800;color:var(--muted);text-align:center;padding:0 0 6px}
+.cc{height:62px;padding:4px 4px 3px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;border-top:2px solid #4A3A3B;min-width:0}
+.cc b{font-family:var(--display);font-weight:900;font-size:21px;line-height:1;color:var(--muted)}
+.cc i{font-style:normal;font-size:10.5px;font-weight:800;line-height:1.15;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:keep-all;overflow-wrap:anywhere;max-width:100%}
+.cc.on{background:var(--red);border-top-color:var(--red);color:var(--cream)}
+.cc.on b,.cc.today b{color:var(--cream)}
+.cc.today{outline:2.5px solid var(--cream);outline-offset:-2.5px}
+.cc.x{border-top-color:transparent}
 </style>
 </head>
 <body>
@@ -314,13 +343,31 @@ const BRANDS = [
   {id:"Newtech", label:"뉴텍"},
   {id:"Cybex", label:"Cybex"},
   {id:"Technogym", label:"Technogym"},
-  {id:"덤벨", label:"덤벨"},
-  {id:"바벨", label:"바벨"},
-  {id:"스미스", label:"스미스머신 운동"},
-  {id:"케이블", label:"케이블 운동"},
-  {id:"맨몸", label:"맨몸"},
   {id:"__mine", label:"내가 추가"},
 ];
+const TYPES = [["","전체"],["machine","머신"],["dumbbell","덤벨"],["barbell","바벨"],["smith","스미스"],["cable","케이블"],["body","맨몸"]];
+function typeOf(m){ return m.smith?"smith": m.equip==="dumbbell"?"dumbbell": m.equip==="barbell"?"barbell": (m.equip==="cable"||(m.parts||[]).includes("케이블"))?"cable": m.equip==="body"?"body":"machine"; }
+// 한 기구로 두 가지 운동을 하는 겸용 머신: 동작별로 기록을 따로 저장
+const VARIANT_RULES = [
+  [/\bdip\b.*\bchin\b|\bchin\b.*\bdip\b/i, [["친업",["등","이두"]],["딥스",["삼두","가슴"]]]],
+  [/(pec|pectoral)[^/]*(\/|with|\().*(rear|reverse)|fly\s*\/\s*rear delt|standing fly chest&back/i, [["플라이",["가슴"]],["리버스 플라이",["후면어깨"]]]],
+  [/iso-lateral chest \/ back/i, [["체스트 프레스",["가슴"]],["로우",["등"]]]],
+  [/leg (curl|extension)\s*\/\s*(leg )?(curl|extension)/i, [["레그 익스텐션",["대퇴사두"]],["레그 컬",["햄스트링"]]]],
+  [/biceps.*triceps/i, [["이두 컬",["이두"]],["삼두 익스텐션",["삼두"]]]],
+  [/abdominal\s*\/\s*(back extension|lower back)/i, [["복근 크런치",["복근"]],["백 익스텐션",["허리"]]]],
+  [/abduct.*adduct|adduct.*abduct|inner\/outer thigh/i, [["어브덕션 (바깥)",["둔근"]],["어덕션 (안쪽)",["둔근"]]]],
+  [/lat pull ?down\s*\/\s*(low row|vertical row)|pulldown \/ row/i, [["랫 풀다운",["등"]],["로우",["등"]]]],
+  [/leg press\/calf raise/i, [["레그 프레스",["대퇴사두","둔근"]],["카프 레이즈",["종아리"]]]],
+  [/squat & calf raise/i, [["스쿼트",["대퇴사두","둔근"]],["카프 레이즈",["종아리"]]]],
+  [/chest & decline combo/i, [["체스트 프레스",["가슴"]],["디클라인 프레스",["가슴"]]]],
+  [/shoulder & incline combo/i, [["숄더 프레스",["전면어깨"]],["인클라인 프레스",["가슴"]]]],
+  [/glute ham \/ reverse hyper/i, [["글루트 햄 레이즈",["햄스트링","둔근"]],["리버스 하이퍼",["둔근","허리"]]]],
+  [/squat \/ high pull/i, [["스쿼트",["대퇴사두","둔근"]],["하이 풀",["등"]]]],
+  [/multi-press/i, [["체스트 프레스",["가슴"]],["인클라인 프레스",["가슴"]],["숄더 프레스",["전면어깨"]]]],
+];
+function applyVariants(list){ for(const m of list){ if(!m.builtin||m.variants) continue; const r=VARIANT_RULES.find(([re])=>re.test(m.name)); if(!r) continue; m.variants=r[1].map(([label,parts])=>({label,parts})); m.parts=[...new Set(r[1].flatMap(v=>v[1]))]; } }
+function vId(m,i){ const b=m.vBase||m.id; return i?b+"~"+i:b; }
+function allIds(m){ return m.variants? m.variants.map((_,i)=>vId(m,i)) : [m.id]; }
 const PLATES = [20,15,10,5,2.5,1.25];
 const PLATES_LB = [45,35,25,10,5,2.5];
 const LB = 0.45359237;
@@ -387,6 +434,8 @@ const SLANG = [
   ["트익", /트라이셉스익스텐션|tricepsextension|armextension/],
   ["오헤익", /오버헤드.*익스텐션/],
   ["스컬", /스컬크러셔/],
+  ["라트익", /라잉트라이셉스익스텐션|스컬크러셔/],
+  ["라트", /라잉트라이셉스익스텐션/],
   ["클그", /클로즈그립/],
   ["복근", /크런치|복근|abdominal|crunch|레그레이즈|플랭크/],
   ["크런치", /크런치|crunch/],
@@ -425,7 +474,8 @@ const BARBELL = [
   ["어깨","오버헤드 프레스 (밀리터리)",["전면어깨","측면어깨"]],["어깨","비하인드 넥 프레스",["전면어깨","측면어깨"]],["어깨","바벨 업라이트 로우",["측면어깨","승모근"]],["어깨","바벨 프런트 레이즈",["전면어깨"]],
   ["이두","바벨 컬",["이두"]],["이두","EZ바 컬",["이두"]],["이두","프리처 컬 (EZ바)",["이두"]],["이두","리버스 컬",["이두","전완"]],["삼두","클로즈그립 벤치 프레스",["삼두","가슴"]],["삼두","바벨 스컬크러셔",["삼두"]],
   ["하체","백 스쿼트",["대퇴사두","둔근"]],["하체","프런트 스쿼트",["대퇴사두"]],["하체","루마니안 데드리프트",["햄스트링","둔근"]],["하체","바벨 힙 쓰러스트",["둔근"]],["하체","바벨 런지",["대퇴사두","둔근"]],["하체","굿모닝",["햄스트링","허리"]],
-].map(([g,n,p],i)=>({id:"bb-"+i, name:n, brand:"바벨", group:g, parts:p, equip:"barbell", bar: /EZ|프리처/.test(n)?10:20}));
+  ["삼두","라잉 트라이셉스 익스텐션",["삼두"]],
+].map(([g,n,p],i)=>({id:"bb-"+i, name:n, brand:"바벨", group:g, parts:p, equip:"barbell", bar: /EZ|프리처|라잉/.test(n)?10:20}));
 const CABLE = [
   ["삼두","케이블 푸시다운 (스트레이트바)"],["삼두","케이블 푸시다운 (V바)"],["삼두","로프 푸시다운"],["삼두","리버스그립 푸시다운"],["삼두","원암 케이블 푸시다운"],["삼두","오버헤드 로프 익스텐션"],["삼두","오버헤드 케이블 익스텐션 (바)"],["삼두","원암 오버헤드 케이블 익스텐션"],["삼두","케이블 킥백 (삼두)"],["삼두","케이블 스컬크러셔 (인클라인)"],["삼두","크로스바디 케이블 익스텐션"],["삼두","케이블 인클라인 트라이셉스 익스텐션"],["삼두","하이풀리 로프 익스텐션 (뒤돌아서)"],
   ["이두","케이블 컬 (스트레이트바)"],["이두","케이블 컬 (EZ바)"],["이두","케이블 해머 컬 (로프)"],["이두","원암 케이블 컬"],["이두","케이블 프리처 컬"],["이두","하이풀리 케이블 컬"],["이두","바야시안 컬"],["이두","케이블 리버스 컬",["이두","전완"]],["이두","케이블 컨센트레이션 컬"],
@@ -513,7 +563,9 @@ function migrate(s){
   for(const ses of s.sessions){ ses.order ||= Object.keys(ses.entries); ses.groups ||= []; }
   const names={push:"Push Day",pull:"Pull Day",legs:"Leg Day",chest:"Chest Day",back:"Back Day",shoulder:"Shoulder Day",arms:"Arm Day"};
   for(const ses of s.sessions){ if(!ses.dayName){ ses.dayName=names[ses.dayType]||s.customDays?.find(d=>d.id===ses.dayType)?.name||ses.dayType||"운동"; ses.parts=legacy[ses.dayType]||[]; } ses.parts ||= []; }
-  s.prefs ||= {brand:null}; s.prefs.unit ||= 'kg'; s.photos ||= {};
+  s.prefs ||= {brand:null}; s.prefs.unit ||= 'kg'; s.photos ||= {}; s.prefs.variant ||= {};
+  if(s.prefs.brand && !BRANDS.some(b=>b.id===s.prefs.brand)) s.prefs.brand=null;
+  applyVariants(s.machines);
   return s;
 }
 function save(){ try{ const slim={...state, machines:state.machines.filter(m=>!m.builtin)}; localStorage.setItem(KEY, JSON.stringify(slim)); }catch(e){} }
@@ -538,16 +590,25 @@ function fmtDate(s){ const [y,m,d]=s.split("-"); const t=new Date(+y,+m-1,+d); c
 function todaySession(){ const s=state.sessions.find(s=>s.date===TODAY); if(s&&s.parts) s.parts=s.parts.filter(p=>PARTS.includes(p)); return s; }
 function groupOf(ses,id){ return (ses.groups||[]).find(g=>g.ids.includes(id)); }
 function groupLabel(ses,g){ const i=(ses.groups||[]).indexOf(g); return (g.ids.length>=3?"자이언트세트":"슈퍼세트")+" "+String.fromCharCode(65+i); }
+function fmtClock(ms){ const t=Math.max(0,Math.floor(ms/1000)), p=n=>String(n).padStart(2,"0"); return `${Math.floor(t/3600)}:${p(Math.floor(t/60)%60)}:${p(t%60)}`; }
 function fmtDur(ms){ const m=Math.floor(ms/60000), h=Math.floor(m/60); return h?`${h}시간 ${m%60}분`:`${m}분`; }
 function orderedIds(ses){ const ids=Object.keys(ses.entries).filter(k=>ses.entries[k].length); const ord=(ses.order||[]).filter(id=>ids.includes(id)); return ord.concat(ids.filter(id=>!ord.includes(id))); }
-function machineById(id){ return state.machines.find(m=>m.id===id); }
+const _vcache={};
+function machineById(id){
+  const k=String(id), t=k.indexOf("~");
+  if(t<0) return state.machines.find(m=>m.id===k);
+  if(_vcache[k]) return _vcache[k];
+  const base=state.machines.find(m=>m.id===k.slice(0,t)), n=+k.slice(t+1); if(!base||!base.variants?.[n]) return base;
+  return _vcache[k]={...base, id:k, vBase:base.id, vIdx:n, parts:base.variants[n].parts};
+}
+function vLabel(m){ return m?.variants ? m.variants[m.vIdx||0].label : ""; }
 function unit(){ return state.prefs?.unit==="lb" ? "lb" : "kg"; }
 function toUnit(kg){ return unit()==="lb" ? Math.round(kg/LB*10)/10 : Math.round(kg*100)/100; }
 function fromUnit(v){ return unit()==="lb" ? Math.round(v*LB*100)/100 : v; }
 function fmtW(kg){ return `${toUnit(kg)}${unit()}`; }
 function matchQ(m,q){ const ql=norm(q); if(!ql) return true; const hay=norm(m.name)+" "+norm(m.ko||"")+" "+norm(m.parts.join(" ")); if(hay.includes(ql)) return true; for(const [k,re] of SLANG){ if(ql.length>=2 && (k===ql || (ql.length>=3 && k.includes(ql)) || ql.includes(k) && k.length>=2 && Math.abs(ql.length-k.length)<=1) && re.test(hay)) return true; } return false; }
 function norm(s){ return String(s).toLowerCase().replace(/[\s\-_/·()]/g,""); }
-function imgOf(m){ return (state.photos&&state.photos[m.id]) || m.img || (m.imgKey && IMG[m.imgKey]) || null; }
+function imgOf(m){ return (state.photos&&state.photos[m.vBase||m.id]) || m.img || (m.imgKey && IMG[m.imgKey]) || null; }
 function lastEntryFor(mid, beforeDate){
   const ss = state.sessions.filter(s=>s.entries[mid]?.length && (!beforeDate || s.date<beforeDate)).sort((a,b)=>a.date<b.date?1:-1);
   return ss[0] ? {date:ss[0].date, sets:ss[0].entries[mid]} : null;
@@ -576,7 +637,7 @@ const ICON_DB = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stro
 const ICON_BB = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M2 32h60"/><rect x="10" y="18" width="7" height="28" rx="1.5"/><rect x="17" y="22" width="6" height="20" rx="1.5"/><rect x="47" y="18" width="7" height="28" rx="1.5"/><rect x="41" y="22" width="6" height="20" rx="1.5"/></svg>`;
 function imgHtml(m){
   const src=imgOf(m);
-  if(src) return `<div class="img ${state.photos&&state.photos[m.id]?"mine":""}" data-ph="${esc(initials(m))}"><img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="var p=this.parentElement;p.classList.add('ico','broken');this.remove()"></div>`;
+  if(src) return `<div class="img ${state.photos&&state.photos[m.vBase||m.id]?"mine":""}" data-ph="${esc(initials(m))}"><img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="var p=this.parentElement;p.classList.add('ico','broken');this.remove()"></div>`;
   if(m.typo) return `<div class="img typo"><div class="tlabel"><small>NAUTILUS</small><b>NITRO</b></div><svg viewBox="0 0 120 120" aria-hidden="true">${IL[m.il]||""}</svg></div>`;
   if(m.equip==="dumbbell") return `<div class="img ico">${ICON_DB}</div>`;
   if(m.equip==="barbell") return `<div class="img ico">${ICON_BB}</div>`;
@@ -591,14 +652,14 @@ function brandLabel(m){ return m.brand; }
 let view = {name:"today"};
 const $top = document.getElementById("top"), $main = document.getElementById("main");
 function go(v){ view=v; render(); window.scrollTo(0,0); }
-function render(){ ({today:renderToday, parts:renderParts, machines:renderMachines, log:renderLog, addMachine:renderAdd, session:renderSession})[view.name](); }
+function render(){ ({today:renderToday, parts:renderParts, machines:renderMachines, log:renderLog, addMachine:renderAdd, session:renderSession, calendar:renderCalendar})[view.name](); }
 function h(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content; }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),1600); }
 
 // ---------- 오늘 ----------
 let selectMode=false, selected=new Set(), timerIv=null;
-function shortName(m){ return (m?.name||"").replace(/^(Hammer Strength|Life Fitness|Nautilus|Newtech|Cybex|Technogym) /,""); }
+function shortName(m,plain){ return (m?.name||"").replace(/^(Hammer Strength|Life Fitness|Nautilus|Newtech|Cybex|Technogym) /,"")+(!plain&&m?.variants?` (${vLabel(m)})`:""); }
 function exRow(ses,id,i,edit){
   const m=machineById(id), sets=ses.entries[id], g=groupOf(ses,id);
   return `<div class="excard ${g?"grouped":""} ${edit&&selected.has(id)?"sel":""}" ${edit?`data-id="${id}" data-open="${id}" role="button" tabindex="0"`:""}><div class="num">${i+1}</div>
@@ -622,7 +683,7 @@ function renderToday(){
   let slab="";
   if(ses){
     if(!ses.startAt) slab = `<button class="slab" id="startWk">START WORKOUT</button>`;
-    else if(!ses.endAt) slab = `<button class="slab" id="finishWk">FINISH WORKOUT<small>운동 시간 <span id="elapsed">${fmtDur(Date.now()-ses.startAt)}</span></small></button>`;
+    else if(!ses.endAt) slab = `<button class="slab run" id="finishWk"><span>FINISH WORKOUT</span><b id="elapsed">${fmtClock(Date.now()-ses.startAt)}</b></button>`;
     else slab = `<div class="slab done"><div>DONE<small>${fmtDur(ses.endAt-ses.startAt)}${ses.rating?`, RATING ${ses.rating}/10`:""}${ses.comment?`\n${esc(ses.comment)}`:""}</small></div><div class="col"><button id="rateWk">RATING & FEEDBACK</button><button id="resumeWk">RESUME</button></div></div>`;
   }
 
@@ -650,6 +711,7 @@ function renderToday(){
     }
     html += `</div></section>`;
   }
+  html += `<button class="ghost" id="toCal">달력 보기</button>`;
   html += slab;
   $main.replaceChildren(h(html)); fitDate();
   const inp=$main.querySelector("#dayName");
@@ -662,7 +724,7 @@ function renderToday(){
   $main.querySelector("#finishWk")?.addEventListener("click",()=>{ ses.endAt=Date.now(); save(); openRating(ses); });
   $main.querySelector("#rateWk")?.addEventListener("click",()=>openRating(ses));
   $main.querySelector("#resumeWk")?.addEventListener("click",()=>{ delete ses.endAt; save(); render(); });
-  if(ses?.startAt && !ses.endAt){ timerIv=setInterval(()=>{ const el=document.getElementById("elapsed"); if(!el){ clearInterval(timerIv); return; } el.textContent=fmtDur(Date.now()-ses.startAt); },15000); }
+  if(ses?.startAt && !ses.endAt){ timerIv=setInterval(()=>{ const el=document.getElementById("elapsed"); if(!el){ clearInterval(timerIv); return; } el.textContent=fmtClock(Date.now()-ses.startAt); },1000); }
   // 카드
   $main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",e=>{ if(e.target.closest(".exdel")||b.dataset.dragged){ delete b.dataset.dragged; return; }
     if(selectMode){ const id=b.dataset.open; selected.has(id)?selected.delete(id):selected.add(id); render(); return; }
@@ -682,6 +744,28 @@ function renderToday(){
     selectMode=false; selected.clear(); save(); toast(ids.length>=3?"자이언트세트로 묶었어":"슈퍼세트로 묶었어"); render(); });
   $main.querySelector("#ungroup")?.addEventListener("click",()=>{ ses.groups=(ses.groups||[]).map(g=>({...g,ids:g.ids.filter(k=>!selected.has(k))})).filter(g=>g.ids.length>=2); selectMode=false; selected.clear(); save(); render(); });
   $main.querySelectorAll("[data-sess]").forEach(b=>b.addEventListener("click",()=>go({name:"session",date:b.dataset.sess})));
+  $main.querySelector("#toCal").addEventListener("click",()=>go({name:"calendar",ym:TODAY.slice(0,7)}));
+}
+
+// ---------- 달력 ----------
+function renderCalendar(){
+  const ym=view.ym||TODAY.slice(0,7), [y,mo]=ym.split("-").map(Number);
+  const shift=d=>{ const t=new Date(y,mo-1+d,1); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0"); };
+  $top.replaceChildren(h(`<button class="back" id="back">뒤로</button><div class="title"></div>${ym!==TODAY.slice(0,7)?`<button class="back" id="calNow" style="margin-left:auto;padding-right:0">오늘</button>`:""}`));
+  const done={}; for(const ses of state.sessions){ if(ses.date.startsWith(ym) && Object.values(ses.entries).some(e=>e.length)) done[+ses.date.slice(8)]=ses; }
+  const first=new Date(y,mo-1,1).getDay(), days=new Date(y,mo,0).getDate();
+  let cells=""; for(let i=0;i<first;i++) cells+=`<div class="cc x"></div>`;
+  for(let d=1;d<=days;d++){ const date=ym+"-"+String(d).padStart(2,"0"), ses=done[d], today=date===TODAY;
+    cells+= ses ? `<button class="cc on ${today?"today":""}" data-date="${date}"><b>${d}</b><i>${esc(ses.dayName||"운동")}</i></button>`
+                : `<div class="cc ${today?"today":""}"><b>${d}</b>${today?"<i>오늘</i>":""}</div>`; }
+  $main.replaceChildren(h(`<section class="calhead"><h2><small>${y}년</small>${mo}월</h2><div class="calnav"><button id="calPrev">이전 달</button><button id="calNext">다음 달</button></div></section>
+    <section class="cal"><div class="cwk">${[..."일월화수목금토"].map(w=>`<span>${w}</span>`).join("")}</div><div class="cgrid">${cells}</div></section>
+    ${Object.keys(done).length?"":`<div class="empty">이 달에는 기록이 없어</div>`}`));
+  document.querySelector("#back").addEventListener("click",()=>go({name:"today"}));
+  document.querySelector("#calNow")?.addEventListener("click",()=>go({name:"calendar",ym:TODAY.slice(0,7)}));
+  $main.querySelector("#calPrev").addEventListener("click",()=>go({name:"calendar",ym:shift(-1)}));
+  $main.querySelector("#calNext").addEventListener("click",()=>go({name:"calendar",ym:shift(1)}));
+  $main.querySelectorAll("[data-date]").forEach(b=>b.addEventListener("click",()=>{ const d=b.dataset.date; go(d===TODAY?{name:"today"}:{name:"session",date:d,from:ym}); }));
 }
 
 // 운동 완료 평점·코멘트
@@ -709,8 +793,8 @@ function renderSession(){
   ids.forEach((id,i)=>{ html += exRow(ses,id,i,false); });
   html+=`</div></section>`;
   $main.replaceChildren(h(html));
-  document.querySelector("#back").addEventListener("click",()=>go({name:"today"}));
-  $main.querySelector("#editRate").addEventListener("click",()=>{ openRating(ses); $main.querySelector("#cancelRate").addEventListener("click",()=>go({name:"session",date:ses.date}),{once:true}); $main.querySelector("#saveRate").addEventListener("click",()=>setTimeout(()=>go({name:"session",date:ses.date}),0),{once:true}); });
+  document.querySelector("#back").addEventListener("click",()=>go(view.from?{name:"calendar",ym:view.from}:{name:"today"}));
+  $main.querySelector("#editRate").addEventListener("click",()=>{ openRating(ses); $main.querySelector("#cancelRate").addEventListener("click",()=>go({name:"session",date:ses.date,from:view.from}),{once:true}); $main.querySelector("#saveRate").addEventListener("click",()=>setTimeout(()=>go({name:"session",date:ses.date,from:view.from}),0),{once:true}); });
 }
 
 // 길게 눌러서 드래그로 순서 바꾸기 (터치/마우스 공통)
@@ -761,7 +845,7 @@ function renderParts(){
 }
 
 // ---------- 종목 (부위별 섹션) ----------
-let filterGroup = null, q = "", expanded = new Set();
+let filterGroup = null, filterType = null, q = "", expanded = new Set();
 const SHOW_N = 8;
 function renderMachines(){
   const ses=todaySession(); if(!ses){ go({name:"today"}); return; }
@@ -774,14 +858,16 @@ function renderMachines(){
   for(const g of dayParts) html += `<button class="chip" data-g="${g}" aria-pressed="${filterGroup===g}">${g}</button>`;
   html += `<button class="chip" data-g="__edit">부위 수정</button></div>`;
   html += `<div class="toolbar"><input type="search" id="q" class="search" placeholder="종목 검색 (예: row, 인클라인, 컬)" value="${esc(q)}">
-    <select id="brandSel" class="brandsel" aria-label="브랜드"><option value="">모든 브랜드</option>${BRANDS.map(b=>`<option value="${b.id}" ${brand===b.id?"selected":""}>${b.label}</option>`).join("")}</select></div>`;
+    ${!filterType||filterType==="machine"?`<select id="brandSel" class="brandsel" aria-label="브랜드"><option value="">모든 브랜드</option>${BRANDS.map(b=>`<option value="${b.id}" ${brand===b.id?"selected":""}>${b.label}</option>`).join("")}</select>`:""}</div>
+    <div class="chips scroll types" id="typeChips">${TYPES.map(([id,l])=>`<button class="chip" data-t="${id}" aria-pressed="${(filterType||"")===id}">${l}</button>`).join("")}</div>`;
 
   html += `<div id="results" class="results"></div>`;
   html += `<button class="ghost" id="addM">+ 종목 직접 추가</button>`;
   $main.replaceChildren(h(html));
   document.querySelector("#back").addEventListener("click",()=>go({name:"parts"}));
   $main.querySelectorAll(".chip[data-g]").forEach(c=>c.addEventListener("click",()=>{ if(c.dataset.g==="__edit"){ go({name:"parts"}); return; } filterGroup=c.dataset.g||null; render(); window.scrollTo(0,0); }));
-  $main.querySelector("#brandSel").addEventListener("change",e=>{ state.prefs.brand=e.target.value||null; save(); render(); });
+  $main.querySelector("#brandSel")?.addEventListener("change",e=>{ state.prefs.brand=e.target.value||null; save(); render(); });
+  $main.querySelectorAll("#typeChips .chip").forEach(c=>c.addEventListener("click",()=>{ filterType=c.dataset.t||null; const y=window.scrollY; render(); window.scrollTo(0,y); }));
   $main.querySelector("#addM").addEventListener("click",()=>go({name:"addMachine"}));
   renderResults();
   const qi=$main.querySelector("#q");
@@ -796,7 +882,8 @@ function renderResults(){
   const brand = state.prefs.brand;
   const dayParts = ses.parts.length ? ses.parts : PARTS;
   const pool = state.machines.filter(m=>{
-    if(brand==="__mine" ? m.builtin : brand && m.brand!==brand) return false;
+    if(filterType && typeOf(m)!==filterType) return false;
+    if((!filterType||filterType==="machine") && (brand==="__mine" ? m.builtin : brand && m.brand!==brand)) return false;
     if(q) return matchQ(m,q);
     return true;
   }).sort((a,b)=>(BRAND_ORDER[a.brand]??9)-(BRAND_ORDER[b.brand]??9));
@@ -811,20 +898,33 @@ function renderResults(){
     const open = expanded.has(g) || !!q || !!filterGroup;
     const shown = open ? list : list.slice(0,SHOW_N);
     html += `<section class="gsec"><div class="ghead"><h2>${esc(g)}</h2><span class="count">${list.length}개</span></div><div class="mgrid">`;
-    for(const m of shown){
-      const today = ses?.entries[m.id]?.length ? ses.entries[m.id] : null;
-      const last = lastEntryFor(m.id, TODAY);
-      const sub = today ? `<b>오늘 ${esc(summarize(today))}</b>` : last ? `지난번 ${fmtDate(last.date)}, ${esc(summarize(last.sets))}` : `아직 기록 없음`;
-      html += `<button class="mcard" data-mid="${m.id}">${imgHtml(m)}<div class="meta"><div class="name">${esc(shortName(m))}</div><div class="sub">${esc(brandLabel(m))}${m.line?`, ${esc(m.line)}`:""}${m.ko?`, ${esc(m.ko.split(" | ")[0])}`:""}</div><div class="last">${sub}</div></div></button>`;
-    }
+    for(const m of shown) html += card(m,g);
     html += `</div>`;
     if(!open && list.length>SHOW_N) html += `<button class="ghost more" data-more="${g}">${esc(g)} ${list.length-SHOW_N}개 더 보기</button>`;
     html += `</section>`;
   }
+  // 부위가 따로 없는 케이블 머신(듀얼 풀리 등)은 케이블 종류나 검색에서 보여줌
+  if(!filterGroup && (q || filterType==="cable")){
+    const orphan=pool.filter(m=>!(m.parts||[]).some(p=>PARTS.includes(p)));
+    if(orphan.length){ total+=orphan.length; html += `<section class="gsec"><div class="ghead"><h2>케이블 머신</h2><span class="count">${orphan.length}개</span></div><div class="mgrid">${orphan.map(m=>card(m,"")).join("")}</div></section>`; }
+  }
   if(!total) html += `<div class="empty">${filterGroup?`"${esc(filterGroup)}"에는 해당 종목이 없어요, 위 칩에서 "오늘 부위 전체"를 눌러 다른 부위도 찾아보세요`:"해당하는 종목이 없어요"}</div>`;
   const box=$main.querySelector("#results"); box.replaceChildren(h(html));
   box.querySelectorAll("[data-more]").forEach(b=>b.addEventListener("click",()=>{ expanded.add(b.dataset.more); renderResults(); }));
-  box.querySelectorAll("[data-mid]").forEach(c=>c.addEventListener("click",()=>go({name:"log",mid:c.dataset.mid})));
+  box.querySelectorAll("[data-mid]").forEach(c=>c.addEventListener("click",()=>{ const m=machineById(c.dataset.mid); go({name:"log",mid:pickVariant(m,c.dataset.part)}); }));
+}
+function card(m,g){
+  const ses=todaySession(), ids=allIds(m);
+  const tid=ids.find(id=>ses?.entries[id]?.length); const today=tid?ses.entries[tid]:null;
+  const last=ids.map(id=>lastEntryFor(id,TODAY)).filter(Boolean).sort((a,b)=>a.date<b.date?1:-1)[0];
+  const sub = today ? `<b>오늘 ${esc(summarize(today))}</b>` : last ? `지난번 ${fmtDate(last.date)}, ${esc(summarize(last.sets))}` : `아직 기록 없음`;
+  return `<button class="mcard" data-mid="${m.id}" data-part="${esc(g||"")}">${imgHtml(m)}<div class="meta"><div class="name">${esc(shortName(m,true))}</div><div class="sub">${esc(brandLabel(m))}${m.line?`, ${esc(m.line)}`:""}${m.ko?`, ${esc(m.ko.split(" | ")[0])}`:""}${m.variants?`, ${esc(m.variants.map(v=>v.label).join(" / "))}`:""}</div><div class="last">${sub}</div></div></button>`;
+}
+function pickVariant(m,g){
+  if(!m?.variants) return m?.id;
+  const match=m.variants.map((v,i)=>v.parts.includes(g)?i:-1).filter(i=>i>=0), pref=state.prefs.variant?.[m.id];
+  const i = match.length && match.length<m.variants.length ? (match.includes(pref)?pref:match[0]) : (pref ?? 0);
+  return vId(m,i);
 }
 
 // ---------- 기록 ----------
@@ -855,13 +955,16 @@ function renderLog(){
   else kg = draft.kg ?? 0;
 
   const g=groupOf(ses,m.id);
+  const unitMini=`<span class="unitmini" data-unitmini><button data-u="kg" aria-pressed="${!isLb}">kg</button><button data-u="lb" aria-pressed="${isLb}">lb</button></span>`;
   $top.replaceChildren(h(`<button class="back" id="back">뒤로</button><button class="unitbtn" id="unitBtn" title="무게 단위 바꾸기"><span class="${isLb?"":"on"}">kg</span><span class="${isLb?"on":""}">lb</span></button>`));
-  const hasPhoto = !!(state.photos&&state.photos[m.id]);
+  const pid = m.vBase||m.id;
+  const hasPhoto = !!(state.photos&&state.photos[pid]);
   let html = "";
   let gt=""; if(g){ gt = `<div class="gtabs"><span class="gtag">${esc(groupLabel(ses,g))}</span>${g.ids.map(id=>{const mm=machineById(id); return `<button class="chip ${id===m.id?"on":""}" data-gm="${id}" aria-pressed="${id===m.id}">${esc((mm?.name||id).replace(/^(Hammer Strength|Life Fitness|Nautilus|Newtech|Cybex|Technogym) /,""))}</button>`;}).join("")}</div>`; }
-  html += `<div class="hero"><div class="info"><div class="hbrand">${esc(brandLabel(m))}${m.line?` ${esc(m.line)}`:""}</div><h2>${esc(shortName(m))}</h2><div class="hmeta">${esc(m.parts.join(", "))}${m.unilateral?", 양팔 독립":""}${m.stack&&equip==="machine"?", 웨이트 스택":""}</div>
+  html += `<div class="hero"><div class="info"><div class="hbrand">${esc(brandLabel(m))}${m.line?` ${esc(m.line)}`:""}</div><h2>${esc(shortName(m,true))}</h2><div class="hmeta">${esc((m.variants?m.variants[m.vIdx||0].parts:m.parts).join(", "))}${m.unilateral?", 양팔 독립":""}${m.stack&&equip==="machine"?", 웨이트 스택":""}</div>
     ${hasPhoto?`<button class="linkbtn" id="photoDel">원래 사진으로</button>`:""}${m.typo&&!hasPhoto?`<a class="reallink" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">실물 사진 보기</a>`:""}</div>
     <label class="heroimg" for="photoIn" title="사진 바꾸기">${imgHtml(m)}<span class="camtag">${hasPhoto?"내 사진":"사진 바꾸기"}</span><input type="file" id="photoIn" accept="image/*" capture="environment" hidden></label></div>`;
+  if(m.variants) html += `<div class="varbox"><div class="eyebrow">이 기구로 하는 운동</div><div class="seg" id="varSeg">${m.variants.map((v,i)=>`<button data-v="${i}" aria-pressed="${(m.vIdx||0)===i}">${esc(v.label)}</button>`).join("")}</div></div>`;
   html += gt;
 
   // 지난 기록 2개
@@ -880,7 +983,7 @@ function renderLog(){
   sets.forEach((s,i)=>{ html += `<div class="set"><span class="idx">${i+1}세트</span><span class="v">${s.kg===0?"맨몸":fmtW(s.kg)} × ${s.reps}<em>${esc(setDetail(s))}</em></span><button class="del" data-del="${i}" aria-label="삭제">×</button></div>`;
     (s.drops||[]).forEach((d,j)=>{ html += `<div class="set drop"><span class="idx">드랍</span><span class="v">${d.kg===0?"맨몸":fmtW(d.kg)} × ${d.reps}</span><button class="del" data-deldrop="${i}:${j}" aria-label="드랍 삭제">×</button></div>`; }); });
   html += `</div></section>`;
-  html += `<section class="sheet entry"><div class="unitrow"><span class="eyebrow">무게 단위</span><div class="seg unitseg" id="unitSeg"><button data-u="kg" aria-pressed="${!isLb}">kg</button><button data-u="lb" aria-pressed="${isLb}">lb (파운드)</button></div></div>`;
+  html += `<section class="sheet entry">`;
   if(equip==="machine"){
     html += `<div class="seg" id="sideSeg"><button data-s="한쪽" aria-pressed="${draft.side==="한쪽"}">한쪽 기준</button><button data-s="양쪽" aria-pressed="${draft.side==="양쪽"}">양쪽 합계</button></div>
       <div class="seg" id="modeSeg"><button data-m="plate" aria-pressed="${draft.mode==="plate"}">플레이트로</button><button data-m="kg" aria-pressed="${draft.mode==="kg"}">${U} 직접</button></div>`;
@@ -892,15 +995,15 @@ function renderLog(){
   if(draft.mode==="plate" || draft.mode==="barbell"){
     html += `<div class="plates"><div class="prow">`;
     for(const p of PL){ const c=draft.plates.filter(x=>Math.abs(x-p)<0.01).length; html += `<button class="pbtn ${c?"on":""}" data-p="${p}">${toUnit(p)}${c?`<span class="cnt">${c}</span>`:`<small>${U}</small>`}</button>`; }
-    html += `</div><div class="calc"><div class="big">${toUnit(kg)}<small>${U}</small></div><div class="formula">${esc(formula)}<br><button class="muted" id="clearP" style="text-decoration:underline;font-size:12px">비우기</button></div></div></div>`;
+    html += `</div><div class="calc"><div class="big">${toUnit(kg)}<small>${U}</small></div>${unitMini}<div class="formula">${esc(formula)}<br><button class="muted" id="clearP" style="text-decoration:underline;font-size:12px">비우기</button></div></div></div>`;
   } else {
     const step = draft.mode==="dumbbell" ? (isLb?5:1) : draft.mode==="body" ? (isLb?5:2.5) : m.stack ? (equip==="cable"?(isLb?5:2.5):(isLb?10:5)) : (isLb?5:2.5);
     const label = draft.mode==="dumbbell"?`덤벨 한쪽 무게 (${U})`:draft.mode==="body"?`추가 중량 (${U}), 보조면 −`:equip==="cable"?`스택 무게 (${U})`:`무게 (${U})`;
-    wField = `<div class="field"><label for="kgIn">${label}</label><div class="inp"><button class="step" data-k="${-step}">−</button><input id="kgIn" type="number" inputmode="decimal" step="${step}" value="${draft.kg==null?"":toUnit(draft.kg)}" placeholder="0"><button class="step" data-k="${step}">+</button></div></div>`;
+    wField = `<div class="field"><div class="lblrow"><label for="kgIn">${label}</label>${unitMini}</div><div class="inp"><button class="step" data-k="${-step}">−</button><input id="kgIn" type="number" inputmode="decimal" step="${step}" value="${draft.kg==null?"":toUnit(draft.kg)}" placeholder="0"><button class="step" data-k="${step}">+</button></div></div>`;
     if(draft.mode==="body") extra += `<button class="ghost" id="bwZero">맨몸 (0)</button>`;
     if(draft.mode==="dumbbell") extra += `<div class="quick" id="dbq">${(isLb?DB_QUICK_LB:DB_QUICK).map(w=>`<button data-w="${w}" class="${Math.abs(toUnit(draft.kg??-1)-w)<0.05?"on":""}">${w}</button>`).join("")}</div>`;
   }
-  html += `<div class="fields ${wField?"":"one"}">${wField}<div class="field"><label for="repsIn">횟수</label><div class="inp"><button class="step" data-r="-1">−</button><input id="repsIn" type="number" inputmode="numeric" value="${draft.reps}"><button class="step" data-r="1">+</button></div></div></div>${extra}
+  html += `<div class="fields ${wField?"":"one"}">${wField}<div class="field"><div class="lblrow"><label for="repsIn">횟수</label></div><div class="inp"><button class="step" data-r="-1">−</button><input id="repsIn" type="number" inputmode="numeric" value="${draft.reps}"><button class="step" data-r="1">+</button></div></div></div>${extra}
     <div class="recrow"><button class="primary" id="addSet">세트 기록</button>${sets.length?`<button class="ghost" id="addDrop">드랍 추가<small>${sets.length}세트에 이어 붙임</small></button>`:""}</div></section>`;
 
   if(sets.length){
@@ -910,13 +1013,14 @@ function renderLog(){
   $main.replaceChildren(h(html));
 
   document.querySelector("#back").addEventListener("click",()=>go({name:"machines"}));
-  $main.querySelectorAll("#unitSeg button").forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.u===U) return; state.prefs.unit=b.dataset.u; save(); draft.mid=null; render(); toast(`단위: ${b.dataset.u}`); }));
+  $main.querySelectorAll("[data-unitmini] button").forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.u===U) return; state.prefs.unit=b.dataset.u; save(); draft.mid=null; render(); toast(`단위: ${b.dataset.u}`); }));
   document.querySelector("#unitBtn").addEventListener("click",()=>{ state.prefs.unit = isLb?"kg":"lb"; save(); draft.mid=null; render(); toast(`단위: ${state.prefs.unit}`); });
+  $main.querySelectorAll("#varSeg button").forEach(b=>b.addEventListener("click",()=>{ const i=+b.dataset.v; state.prefs.variant[pid]=i; save(); if(i!==(m.vIdx||0)) go({name:"log",mid:vId(m,i)}); }));
   $main.querySelectorAll("[data-gm]").forEach(b=>b.addEventListener("click",()=>go({name:"log",mid:b.dataset.gm})));
   $main.querySelectorAll("[data-sess]").forEach(b=>b.addEventListener("click",()=>go({name:"session",date:b.dataset.sess})));
   $main.querySelector("#moreHist")?.addEventListener("click",()=>{ view.allHist=true; render(); });
-  $main.querySelector("#photoIn").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f) return; shrinkImage(f,480,url=>{ state.photos[m.id]=url; save(); toast("사진 바꿨어"); render(); }); });
-  $main.querySelector("#photoDel")?.addEventListener("click",()=>{ delete state.photos[m.id]; save(); render(); });
+  $main.querySelector("#photoIn").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f) return; shrinkImage(f,480,url=>{ state.photos[pid]=url; save(); toast("사진 바꿨어"); render(); }); });
+  $main.querySelector("#photoDel")?.addEventListener("click",()=>{ delete state.photos[pid]; save(); render(); });
   $main.querySelectorAll("#sideSeg button").forEach(b=>b.addEventListener("click",()=>{draft.side=b.dataset.s;render();}));
   $main.querySelectorAll("#modeSeg button").forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.m==="kg"&&draft.mode==="plate") draft.kg=plateSum||draft.kg; draft.mode=b.dataset.m; render(); }));
   $main.querySelectorAll("#bars button").forEach(b=>b.addEventListener("click",()=>{ draft.bar=+b.dataset.bar; render(); }));
